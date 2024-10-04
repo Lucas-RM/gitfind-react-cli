@@ -1,0 +1,14 @@
+header {
+    align-items: center;
+    background-color: #2D333B;
+    display: flex;
+    height: 52px;
+    justify-content: center;
+    width: 100%;
+}
+
+h1 {
+    color: #FFFFFF;
+    font-family: 'Inter, Roboto, Arial';
+    font-size: 24px;
+}
