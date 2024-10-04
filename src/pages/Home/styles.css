@@ -91,6 +91,13 @@ button:hover {
     margin: 20px 0 0 0;
 }
 
+.titulo-repositorio {
+    color: #FFFFFF;
+    font-size: 40px;
+    margin: 32px 0;
+    text-align: center;
+}
+
 /* MEDIAS */
 
 @media screen and (min-width: 1478px) {
