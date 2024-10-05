@@ -1,4 +1,5 @@
 .item-list {
+    font-family: 'Secular One', 'Segoe UI', 'Open Sans', sans-serif;
     margin: 24px 0;
 }
 
@@ -8,8 +9,19 @@
     margin: 24px 0;
 }
 
+.item-list strong a {
+    color: #539BF5;
+    text-decoration: none;
+    transition: 1s linear text-decoration;
+}
+
+.item-list strong a:hover {
+    text-decoration: underline;
+}
+
 .item-list p {
     color: #999999;
-    font-size: 12px;
+    font-family: 'Segoe UI', Roboto, 'Open Sans', sans-serif;
+    font-size: 13px;
     margin: 24px 0;
 }

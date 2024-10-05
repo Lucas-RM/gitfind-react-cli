@@ -63,6 +63,7 @@ button:hover {
 
 .perfil {
     display: flex;
+    font-family: 'Segoe UI', Roboto, 'Open Sans', sans-serif;
     margin: 40px 0;
 }
 
@@ -76,23 +77,27 @@ button:hover {
 
 .perfil h3 {
     color: #999999;
+    font-family: 'Secular One', 'Segoe UI', Roboto, 'Open Sans', sans-serif;
     font-size: 24px;
 }
 
 .perfil span {
     color: #999999;
     display: block;
+    font-family: 'Segoe UI', Roboto, 'Open Sans', sans-serif;
     font-size: 12px;
 }
 
 .perfil p {
     color: #999999;
-    font-size: 12px;
+    font-family: 'Segoe UI', Roboto, 'Open Sans', sans-serif;
+    font-size: 13px;
     margin: 20px 0 0 0;
 }
 
 .titulo-repositorio {
     color: #FFFFFF;
+    font-family: 'Segoe UI', Roboto, 'Open Sans', sans-serif;
     font-size: 40px;
     margin: 32px 0;
     text-align: center;
