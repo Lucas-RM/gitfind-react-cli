@@ -11,6 +11,19 @@
 # production
 /build
 
+# Pasta de cache do Yarn
+.yarn/
+
+# Arquivos de lock
+package-lock.json
+yarn.lock
+
+# Editor/IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
 # misc
 .DS_Store
 .env.local

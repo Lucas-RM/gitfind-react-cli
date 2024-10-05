@@ -1,4 +1,10 @@
+.App {
+    height: 100vh;
+    background-color: #2D333B;
+}
+
 .conteudo {
+    background-color: #2D333B;
     display: flex;
     align-items: flex-start;
     justify-content: flex-end;
@@ -76,7 +82,7 @@ button:hover {
 }
 
 .perfil h3 {
-    color: #999999;
+    color: #cccccc;
     font-family: 'Secular One', 'Segoe UI', Roboto, 'Open Sans', sans-serif;
     font-size: 24px;
 }
