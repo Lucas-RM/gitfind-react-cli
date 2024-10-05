@@ -99,8 +99,78 @@ button:hover {
     color: #FFFFFF;
     font-family: 'Segoe UI', Roboto, 'Open Sans', sans-serif;
     font-size: 40px;
-    margin: 32px 0;
+    margin: 40px 0 50px;
     text-align: center;
+}
+
+.filtros {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.filtro-ordenar-data {
+    font-family: 'Secular One', 'Segoe UI', Roboto, 'Open Sans', sans-serif;
+    font-size: 12px;
+}
+
+.filtro-ordenar-data label {
+    display: block;
+    margin: 0 0 10px 5px;
+}
+
+.custom-select {
+	position: relative;
+}
+
+.custom-select select {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 100%;
+    font-family: inherit;
+	font-size: 12px;
+	padding: 5px 40px 5px 10px;
+	background-color: #2D333B;
+	border: 1px solid #C4D1EB;
+	border-radius: 12px;
+	color: #FFFAFA;
+	cursor: pointer;
+	outline: none;
+}
+
+.custom-select select:focus {
+	background: #2D333B;
+	border: 1px solid #539BF5;
+	border-radius: 12px;
+}
+
+.custom-select::after {
+	content: "";
+	position: absolute;
+	pointer-events: none;
+	top: 50%;
+	right: 10px;
+	transform: translate(0, -50%);
+	width: 12px;
+	height: 12px;
+	background-color: #FFFAFA;
+    border-radius: 12px;
+	clip-path: polygon(50% 80%, 0 20%, 100% 20%);
+}
+
+.filtros button {
+    border-radius: 12px;
+    color: #FFFFFF;
+    font-family: 'Secular One', 'Segoe UI', Roboto, 'Open Sans', sans-serif;
+    font-size: 12px;
+    padding: 5px 20px;
+}
+
+.filtros button:hover {
+    background: rgb(29, 34, 41);
+    border: 1px solid #ee730f;
+    color: #ee730f;
 }
 
 /* MEDIAS */
