@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/gitfind-react-cli/static/css/main.04e86922.css",
+    "main.js": "/gitfind-react-cli/static/js/main.b7432751.js",
+    "index.html": "/gitfind-react-cli/index.html",
+    "main.04e86922.css.map": "/gitfind-react-cli/static/css/main.04e86922.css.map",
+    "main.b7432751.js.map": "/gitfind-react-cli/static/js/main.b7432751.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.04e86922.css",
+    "static/js/main.b7432751.js"
+  ]
+}
