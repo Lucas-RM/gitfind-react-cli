@@ -8,7 +8,7 @@ function App() {
   const [user, setUser] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [repos, setRepos] = useState(null);
-  const [filteredData, setFilteredData] = useState(null);
+  const [filteredRepos, setFilteredRepos] = useState(null);
   const [sortOrder, setSortOrder] = useState(''); // Estado para o tipo de ordenação
 
   const handleGetData = async () => {
@@ -29,31 +29,35 @@ function App() {
 
       if (newRepos.length) {
         setRepos(sortedAlphabetically);
-        setFilteredData(sortedAlphabetically);
+        setFilteredRepos(sortedAlphabetically);
       }
     }
   };
 
-  // Função para filtrar por data em ordem crescente ou decrescente
+  // Função para filtrar por data em ordem de mais ou menos recente da Criação ou Atualização
   const handleSortByDate = (order) => {
     const sortedByDate = [...repos].sort((a, b) => {
       switch (order) {
-        case 'crescente':
-          return new Date(a.pushed_at) - new Date(b.pushed_at);
-        case 'decrescente':
+        case 'criado-mais-recente':
+          return new Date(b.created_at) - new Date(a.created_at);
+        case 'criado-menos-recente':
+          return new Date(a.created_at) - new Date(b.created_at);
+        case 'atualizado-mais-recente':
           return new Date(b.pushed_at) - new Date(a.pushed_at);
+        case 'atualizado-menos-recente':
+          return new Date(a.pushed_at) - new Date(b.pushed_at);
         default:
-          return null;
+          return 0;
       }
     });
     
-    setFilteredData(sortedByDate);
+    setFilteredRepos(sortedByDate);
   };
 
   // Função para filtrar por 'stargazers_count' maior ou igual a 1
   const filterByStars = () => {
     const filteredByStars = repos.filter(item => item.stargazers_count >= 1);
-    setFilteredData(filteredByStars);
+    setFilteredRepos(filteredByStars);
   };
 
   // Função para ordenar alfabeticamente
@@ -61,7 +65,7 @@ function App() {
     const sortedAlphabetically = [...repos].sort((a, b) =>
       a.name.localeCompare(b.name)
     );
-    setFilteredData(sortedAlphabetically);
+    setFilteredRepos(sortedAlphabetically);
   };
 
   // Função para tratar a mudança da opção selecionada no select
@@ -107,7 +111,7 @@ function App() {
             </>
           ) : null}
 
-          {filteredData?.length ? (
+          {filteredRepos?.length ? (
             <div>
               <h4 className="titulo-repositorio">Repositórios</h4>
 
@@ -118,8 +122,10 @@ function App() {
                   <div className="custom-select">
                     <select id="sortOrder" value={ sortOrder } onChange={ handleSortChange }>
                       <option value="">Selecione a Ordem</option>
-                      <option value="decrescente">Decrescente</option>
-                      <option value="crescente">Crescente</option>
+                      <option value="criado-mais-recente">Mais Recente (criado)</option>
+                      <option value="criado-menos-recente">Menos Recente (criado)</option>
+                      <option value="atualizado-mais-recente">Mais Recente (atualizado)</option>
+                      <option value="atualizado-menos-recente">Menos Recente (atualizado)</option>
                     </select>
                   </div>
 
@@ -130,7 +136,7 @@ function App() {
                 <button onClick={ handleSortAlphabetically }>Ordenar Alfabeticamente</button>
               </div>
 
-              {filteredData.map(repo => (
+              {filteredRepos.map(repo => (
                 <ItemList link={ repo.html_url } title={ repo.name } description={ repo.description } />
               ))}
             </div> 
