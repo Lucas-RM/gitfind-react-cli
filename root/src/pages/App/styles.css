@@ -1,10 +1,10 @@
 .App {
     height: 100vh;
-    background-color: #2D333B;
+    background-color: #1D2128;
 }
 
 .conteudo {
-    background-color: #2D333B;
+    background-color: #1D2128;
     display: flex;
     align-items: flex-start;
     justify-content: flex-end;
