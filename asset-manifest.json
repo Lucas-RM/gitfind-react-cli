@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/gitfind-react-cli/static/css/main.2d3ef8f8.css",
-    "main.js": "/gitfind-react-cli/static/js/main.74c622f9.js",
+    "main.css": "/gitfind-react-cli/static/css/main.8738db4b.css",
+    "main.js": "/gitfind-react-cli/static/js/main.edc31bfb.js",
     "index.html": "/gitfind-react-cli/index.html",
-    "main.2d3ef8f8.css.map": "/gitfind-react-cli/static/css/main.2d3ef8f8.css.map",
-    "main.74c622f9.js.map": "/gitfind-react-cli/static/js/main.74c622f9.js.map"
+    "main.8738db4b.css.map": "/gitfind-react-cli/static/css/main.8738db4b.css.map",
+    "main.edc31bfb.js.map": "/gitfind-react-cli/static/js/main.edc31bfb.js.map"
   },
   "entrypoints": [
-    "static/css/main.2d3ef8f8.css",
-    "static/js/main.74c622f9.js"
+    "static/css/main.8738db4b.css",
+    "static/js/main.edc31bfb.js"
   ]
 }
