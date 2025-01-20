@@ -1,150 +1,323 @@
-import { useState } from 'react';
-import { Header } from '../../components/Header';
+import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+import { Header } from "../../components/Header";
+import ItemList from "../../components/ItemList";
+
 import background from "../../assets/background.png";
 import "./styles.css";
-import ItemList from '../../components/ItemList';
+
+// Carregar variáveis de ambiente
+const isDevelopment = process.env.NODE_ENV === 'development';
+const TOKEN = isDevelopment ? process.env.REACT_APP_GITHUB_TOKEN : null;
+const config = TOKEN ? {
+  method: "GET",
+  headers: {
+    Authorization: `token ${TOKEN}`,
+    Accept: "application/vnd.github.v3+json",
+  },
+} : { method: "GET" };
 
 function App() {
-  const [user, setUser] = useState('');
-  const [currentUser, setCurrentUser] = useState(null);
-  const [repos, setRepos] = useState(null);
-  const [filteredRepos, setFilteredRepos] = useState(null);
-  const [sortOrder, setSortOrder] = useState(''); // Estado para o tipo de ordenação
+	const [user, setUser] = useState("");
+	const [currentUser, setCurrentUser] = useState(null);
+	const [repos, setRepos] = useState(null);
+	const [filteredRepos, setFilteredRepos] = useState(null);
+	const [filters, setFilters] = useState({
+		dateSort: "",
+		alphabeticalSort: "a-z",
+		starsFilter: false,
+	});
 
-  const handleGetData = async () => {
-    const userData = await fetch(`https://api.github.com/users/${user}`);
-    const newUser = await userData.json();
+	const handleGetData = async () => {
+		try {
+			const userData = await fetch(
+				`https://api.github.com/users/${user}`,
+				config
+			);
+			const newUser = await userData.json();
 
-    if (newUser.name) {
-      const { avatar_url, name, bio, login } = newUser;
-      setCurrentUser({ avatar_url, name, bio, login });
+			if (newUser.name) {
+				const { avatar_url, name, bio, login } = newUser;
+				setCurrentUser({ avatar_url, name, bio, login });
 
-      const reposData = await fetch(`https://api.github.com/users/${user}/repos`);
-      const newRepos = await reposData.json();
+				const reposPerPage = 30;
+				const numberOfRepos = newUser.public_repos;
+				const numberOfPages = Math.ceil(numberOfRepos / reposPerPage);
 
-      // Ordenando os dados alfabeticamente usando localeCompare
-      const sortedAlphabetically = newRepos.sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
+				let newRepos = [];
+				for (let i = 1; i <= numberOfPages; i++) {
+					const reposData = await fetch(
+						`https://api.github.com/users/${user}/repos?page=${i}`,
+						config
+					);
+					if (!reposData.ok)
+						throw new Error(
+							`StatusCode (${reposData.status}) - Erro ao buscar dados!`
+						);
 
-      if (newRepos.length) {
-        setRepos(sortedAlphabetically);
-        setFilteredRepos(sortedAlphabetically);
-      }
-    }
-  };
+					const data = await reposData.json();
+					if (data.length > 0) {
+						newRepos.push(...data);
+					}
+				}
 
-  // Função para filtrar por data em ordem de mais ou menos recente da Criação ou Atualização
-  const handleSortByDate = (order) => {
-    const sortedByDate = [...repos].sort((a, b) => {
-      switch (order) {
-        case 'criado-mais-recente':
-          return new Date(b.created_at) - new Date(a.created_at);
-        case 'criado-menos-recente':
-          return new Date(a.created_at) - new Date(b.created_at);
-        case 'atualizado-mais-recente':
-          return new Date(b.pushed_at) - new Date(a.pushed_at);
-        case 'atualizado-menos-recente':
-          return new Date(a.pushed_at) - new Date(b.pushed_at);
-        default:
-          return 0;
-      }
-    });
-    
-    setFilteredRepos(sortedByDate);
-  };
+				setRepos(newRepos);
+				applyFilters(newRepos, filters);
+			} else {
+				toast("Usuário não encontrado!");
+			}
+		} catch (error) {
+			toast(error.message ?? "Erro ao buscar dados!");
+		}
+	};
 
-  // Função para filtrar por 'stargazers_count' maior ou igual a 1
-  const filterByStars = () => {
-    const filteredByStars = repos.filter(item => item.stargazers_count >= 1);
-    setFilteredRepos(filteredByStars);
-  };
+	const applyFilters = async (data, activeFilters) => {
+		let filtered = [...data];
 
-  // Função para ordenar alfabeticamente
-  const handleSortAlphabetically = () => {
-    const sortedAlphabetically = [...repos].sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
-    setFilteredRepos(sortedAlphabetically);
-  };
+		// Filtro por estrelas
+		if (activeFilters.starsFilter) {
+			filtered = await filterListByStars(filtered);
+		}
 
-  // Função para tratar a mudança da opção selecionada no select
-  const handleSortChange = (e) => {
-    const order = e.target.value;
-    setSortOrder(order); // Atualiza o estado
-    handleSortByDate(order); // Filtra de acordo com a opção selecionada
-  };
+		// Ordenação por data
+		if (activeFilters.dateSort) {
+			if (activeFilters.starsFilter) {
+				setFilters({
+					dateSort: activeFilters.dateSort,
+					alphabeticalSort: "",
+					starsFilter: activeFilters.starsFilter,
+				});
+			}
+			filtered = filterListByDate(filtered, activeFilters.dateSort);
+		}
 
-  return (
-    <div className="App">
-      <Header />
+		// Ordenação alfabética
+		if (activeFilters.alphabeticalSort) {
+			filtered = sortListAlphabetically(
+				filtered,
+				activeFilters.alphabeticalSort
+			);
+		}
 
-      <div className="conteudo">
-        <img src={ background } className="background" alt="background app" />
+		setFilteredRepos(filtered);
+	};
 
-        <div className="info" >
-          <div className="area-de-busca">
-            <input 
-              name="usuario" 
-              value={ user }
-              onChange={ (event) => setUser(event.target.value) }
-              placeholder="@username" />
+	const handleFilterChange = (e, filterType) => {
+		let newFilters = {
+			...filters,
+			[filterType]:
+				e.target.type === "checkbox"
+					? e.target.checked
+					: e.target.value,
+		};
 
-            <button onClick={ handleGetData }>Buscar</button>
-          </div>
+		if (newFilters.dateSort && newFilters.alphabeticalSort) {
+			toast(
+				"Os dados não podem serem ordenados por Data e Alfabeticamente!"
+			);
+			newFilters[filterType] = "";
+		}
 
-          {currentUser?.name ? (
-            <>
-              <div className="perfil">
-                <img 
-                  src={currentUser.avatar_url} 
-                  className="image-profile" 
-                  alt="imagem de perfil" />
-                <div>
-                  <h3>{ currentUser.name }</h3>
-                  <span>@{ currentUser.login }</span>
-                  <p>{ currentUser.bio }</p>
-                </div>
+		setFilters(newFilters);
+		applyFilters(repos, newFilters);
+	};
+
+	// Função para filtrar por data em ordem de mais ou menos recente da Criação ou Atualização
+	const filterListByDate = (list, order) => {
+		return list.sort((a, b) => {
+			switch (order) {
+				case "criado-mais-recente":
+					return new Date(b.created_at) - new Date(a.created_at);
+				case "criado-menos-recente":
+					return new Date(a.created_at) - new Date(b.created_at);
+				case "atualizado-mais-recente":
+					return new Date(b.pushed_at) - new Date(a.pushed_at);
+				case "atualizado-menos-recente":
+					return new Date(a.pushed_at) - new Date(b.pushed_at);
+				default:
+					return 0;
+			}
+		});
+	};
+
+	// Função para filtrar por estrelas ('stargazers_count') >= 1
+	const filterListByStars = async (list) => {
+		// Criar uma lista de promessas
+		const promises = list.map(async (item) => {
+			const reposData = await fetch(item.stargazers_url, config);
+			const data = await reposData.json();
+
+			const isStarredByAuthor =
+				data.filter((d) => d.login === item.owner.login).length > 0;
+
+			return item.stargazers_count >= 1 && isStarredByAuthor
+				? item
+				: null;
+		});
+
+		// Resolver todas as promessas e filtrar os resultados
+		const resolved = await Promise.all(promises);
+		const filtered = resolved.filter((item) => item !== null);
+
+		return filtered;
+	};
+
+	// Função para ordenar alfabeticamente
+	const sortListAlphabetically = (list, order = "a-z") => {
+		return list.sort((a, b) => {
+			const comparison = a.name.localeCompare(b.name);
+			return order === "z-a" ? -comparison : comparison;
+		});
+	};
+
+	return (
+		<div className="App">
+			<Header />
+
+			<div className="conteudo">
+				<img
+					src={background}
+					className="background"
+					alt="background app"
+				/>
+
+				<div className="info">
+					<div className="area-de-busca">
+						<input
+							name="usuario"
+							value={user}
+							onChange={(event) => setUser(event.target.value)}
+							placeholder="@username"
+						/>
+
+						<button onClick={handleGetData}>Buscar</button>
+					</div>
+
+					<ToastContainer theme="dark" />
+
+					{currentUser?.name ? (
+						<>
+							<div className="perfil">
+								<img
+									src={currentUser.avatar_url}
+									className="image-profile"
+									alt="imagem de perfil"
+								/>
+								<div>
+									<h3>{currentUser.name}</h3>
+									<span>@{currentUser.login}</span>
+									<p>{currentUser.bio}</p>
+								</div>
+							</div>
+
+							<hr />
+						</>
+					) : null}
+
+					{filteredRepos?.length ? (
+						<div>
+							<h4 className="titulo-repositorio">Repositórios</h4>
+
+							<div className="filtros">
+								<div className="filtro">
+									<label htmlFor="dateSort">
+										Ordenar por Data:
+									</label>
+
+									<div className="custom-select">
+										<select
+											id="dateSort"
+											value={filters.dateSort}
+											onChange={(e) =>
+												handleFilterChange(
+													e,
+													"dateSort"
+												)
+											}
+										>
+											<option value="">
+												Selecione a Ordem
+											</option>
+											<option value="criado-mais-recente">
+												Mais Recente (criado)
+											</option>
+											<option value="criado-menos-recente">
+												Menos Recente (criado)
+											</option>
+											<option value="atualizado-mais-recente">
+												Mais Recente (atualizado)
+											</option>
+											<option value="atualizado-menos-recente">
+												Menos Recente (atualizado)
+											</option>
+										</select>
+									</div>
+								</div>
+
+								<div className="filtro">
+									<label htmlFor="alphabeticalSort">
+										Ordenar Alfabeticamente:
+									</label>
+
+									<div className="custom-select">
+										<select
+											id="alphabeticalSort"
+											value={filters.alphabeticalSort}
+											onChange={(e) =>
+												handleFilterChange(
+													e,
+													"alphabeticalSort"
+												)
+											}
+										>
+											<option value="">
+												Selecione a Ordem
+											</option>
+											<option value="a-z">A-Z</option>
+											<option value="z-a">Z-A</option>
+										</select>
+									</div>
+								</div>
+
+								<div className="filtro filtro-estrela">
+									<label htmlFor="starsFilter">
+										<input
+											type="checkbox"
+											id="starsFilter"
+											checked={filters.starsFilter}
+											onChange={(e) =>
+												handleFilterChange(
+													e,
+													"starsFilter"
+												)
+											}
+										/>
+										Apenas com Estrelas
+									</label>
+								</div>
+							</div>
+
+              <div className="repos-container">
+                <span className="repos-count">{filteredRepos.length}</span>
+                <span className="repos-label">Repositórios</span>
               </div>
-              
-              <hr />
-            </>
-          ) : null}
 
-          {filteredRepos?.length ? (
-            <div>
-              <h4 className="titulo-repositorio">Repositórios</h4>
-
-              <div className="filtros">
-                <div className="filtro-ordenar-data">
-                  <label htmlFor="sortOrder">Ordenar por Data: </label>
-
-                  <div className="custom-select">
-                    <select id="sortOrder" value={ sortOrder } onChange={ handleSortChange }>
-                      <option value="">Selecione a Ordem</option>
-                      <option value="criado-mais-recente">Mais Recente (criado)</option>
-                      <option value="criado-menos-recente">Menos Recente (criado)</option>
-                      <option value="atualizado-mais-recente">Mais Recente (atualizado)</option>
-                      <option value="atualizado-menos-recente">Menos Recente (atualizado)</option>
-                    </select>
-                  </div>
-
-                  <span className="select-focus"></span>
-                </div>
-
-                <button onClick={ filterByStars }>Filtrar por Estrelas</button>
-                <button onClick={ handleSortAlphabetically }>Ordenar Alfabeticamente</button>
-              </div>
-
-              {filteredRepos.map(repo => (
-                <ItemList link={ repo.html_url } title={ repo.name } description={ repo.description } />
-              ))}
-            </div> 
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
+							{filteredRepos.map((repo) => (
+								<ItemList
+									key={repo.id}
+									link={repo.html_url}
+									title={repo.name}
+									description={repo.description}
+								/>
+							))}
+						</div>
+					) : null}
+				</div>
+			</div>
+		</div>
+	);
 }
 
 export default App;
